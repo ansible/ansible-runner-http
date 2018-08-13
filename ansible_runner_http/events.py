@@ -1,7 +1,9 @@
 import os
 import requests
 import requests_unixsocket
+import logging
 
+logger = logging.getLogger('ansible-runner')
 
 def send_request(url, data, headers={}, urlpath=None):
     if os.path.exists(url):
@@ -12,7 +14,7 @@ def send_request(url, data, headers={}, urlpath=None):
     else:
         url_actual = url
         session = requests.Session()
-    print(url_actual)
+    logger.debug("Sending payload to {}".format(url_actual))
     return session.post(url_actual, headers=headers, json=(data))
 
 
@@ -32,11 +34,11 @@ def status_handler(runner_config, data):
     if plugin_config['runner_url'] is not None:
         status = send_request(plugin_config['runner_url'],
                               data=data,
-                              headers=plugin_config['headers']
+                              headers=plugin_config['runner_headers'],
                               urlpath=plugin_config['runner_path'])
-        print("runner http {}".format(status))
+        logger.debug("POST Response {}".format(status))
     else:
-        print("HTTP Plugin Skipped")
+        logger.info("HTTP Plugin Skipped")
 
 
 def event_handler(runner_config, data):
